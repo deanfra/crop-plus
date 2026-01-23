@@ -1,8 +1,8 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
-import { get, set } from 'idb-keyval';
 
 import { VideoTransform } from '../types';
+import { hasAudio, retrieveBlob } from '../utils';
 
 const canUseMT =
   import.meta.env.VITE_ENABLE_MT === '1' && 'SharedArrayBuffer' in window;
@@ -10,52 +10,6 @@ const ffmpegVersion = '0.12.10';
 const ffmpegName = canUseMT ? 'core-mt' : 'core';
 const ffmpegWorker = canUseMT ? 'ffmpeg-core.worker.js' : undefined;
 const ffmpegBaseURL = `https://unpkg.com/@ffmpeg/${ffmpegName}@${ffmpegVersion}/dist/esm`;
-
-async function retrieveBlob(
-  url: string,
-  type: string,
-  onProgress?: (progress: number) => void,
-) {
-  let buffer = await get(url);
-  if (!buffer) {
-    const response = await fetch(url);
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error(`Unable to fetch: ${url}`);
-    }
-
-    const contentLength = +response.headers.get('Content-Length')!;
-    let receivedLength = 0;
-    const chunks = [];
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) {
-        break;
-      }
-
-      chunks.push(value);
-      receivedLength += value.length;
-      onProgress?.(receivedLength / contentLength);
-    }
-
-    buffer = await new Blob(chunks).arrayBuffer();
-
-    try {
-      set(url, buffer);
-      console.log(`Saved to IndexedDB: ${url}`);
-    } catch {
-      //
-    }
-  } else {
-    console.log(`Loaded from IndexedDB: ${url}`);
-  }
-
-  const blob = new Blob([buffer], { type });
-  return URL.createObjectURL(blob);
-}
 
 class FfmpegStore {
   loaded = false;
@@ -130,11 +84,13 @@ class FfmpegStore {
     this.output = '';
 
     try {
+      // console.log('writeFile', args);
+
       await this.ffmpeg.writeFile(
         'input',
         new Uint8Array(await file.arrayBuffer()),
       );
-      await this.ffmpeg.exec(['-i', 'input', ...args, 'output.mp4']);
+      await this.ffmpeg.exec([...args, 'output.mp4']);
 
       const data = (await this.ffmpeg.readFile('output.mp4')) as Uint8Array;
       return new File([data.buffer], 'output.mp4', { type: 'video/mp4' });
@@ -166,6 +122,7 @@ class MainStore {
   file: File | undefined = undefined;
   fileLoading = false;
   transform: VideoTransform = {};
+  hasAudio = true;
 
   ffmpeg = new FfmpegStore();
 
@@ -240,6 +197,8 @@ class MainStore {
     });
 
     video.addEventListener('canplay', () => {
+      this.hasAudio = hasAudio(video);
+
       if (this.fileLoading) {
         this.fileLoading = false;
         this.step = 1;
@@ -247,13 +206,15 @@ class MainStore {
     });
 
     video.addEventListener('ended', () => {
-      const start = this.transform.time?.[0] || 0;
+      const start = this.transform.time?.[0][0] || 0;
       video.currentTime = start;
     });
 
     video.addEventListener('timeupdate', () => {
-      const start = this.transform.time?.[0] || 0;
-      const end = this.transform.time?.[1] || video.duration;
+      // const start = this.transform.time?.[0][0] || 0;
+      // const end = this.transform.time?.[0][1] || video.duration;
+      const start = 0;
+      const end = video.duration;
 
       if (video.currentTime > end) {
         video.currentTime = start;

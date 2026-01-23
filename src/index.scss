@@ -6,6 +6,8 @@
   --color-interactive-dark: #111111;
   --color-interactive: #33333a;
   --color-interactive-hover: #444444;
+  --color-border-hover: lime;
+  --color-range-bg: #2F583C;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +19,8 @@
     --color-interactive-dark: #29292a;
     --color-interactive: #33333a;
     --color-interactive-hover: #444444;
+    --color-border-hover: lime;
+    --color-range-bg: #2F583C;
   }
 }
 
@@ -92,6 +96,11 @@ button,
   height: 2rem;
   margin-right: 0.25rem;
   font-size: 0.9rem;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   svg {
     font-size: 1.2rem;

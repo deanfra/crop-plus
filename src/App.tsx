@@ -14,7 +14,7 @@ export const App: React.FC = observer(() => {
 
   return (
     <div className="app">
-      <h1>crop.mov</h1>
+      <h1>crop.mov +</h1>
       <Steps
         current={step}
         onChange={step => {

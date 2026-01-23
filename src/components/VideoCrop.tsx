@@ -224,39 +224,6 @@ export const VideoCrop: React.FC<VideoCropProps> = ({
 
   return (
     <div>
-      <div className={styles.options}>
-        <div className="select">
-          <select
-            value={ratioName}
-            onChange={e => {
-              const name = e.target.value;
-              setRatioName(name);
-
-              if (name !== 'free') {
-                const split = name.split(':');
-                const newRatio = +split[0] / +split[1];
-                setRatio(newRatio);
-
-                const ensuredArea = ensureRatio(newRatio, area);
-                if (ensuredArea) {
-                  onChange(ensuredArea);
-                }
-              } else {
-                setRatio(undefined);
-              }
-            }}
-          >
-            <option value="free">Free</option>
-            <option value="1:1">1:1</option>
-            <option value="2:3">2:3</option>
-            <option value="3:2">3:2</option>
-            <option value="3:4">3:4</option>
-            <option value="4:3">4:3</option>
-            <option value="9:16">9:16</option>
-            <option value="16:9">16:9</option>
-          </select>
-        </div>
-      </div>
       <div className={styles.crop}>
         <canvas
           width={video.videoWidth}
@@ -333,6 +300,39 @@ export const VideoCrop: React.FC<VideoCropProps> = ({
               />
             ))}
           </div>
+        </div>
+      </div>
+      <div className={styles.options}>
+        <div className="select">
+          <select
+            value={ratioName}
+            onChange={e => {
+              const name = e.target.value;
+              setRatioName(name);
+
+              if (name !== 'free') {
+                const split = name.split(':');
+                const newRatio = +split[0] / +split[1];
+                setRatio(newRatio);
+
+                const ensuredArea = ensureRatio(newRatio, area);
+                if (ensuredArea) {
+                  onChange(ensuredArea);
+                }
+              } else {
+                setRatio(undefined);
+              }
+            }}
+          >
+            <option value="free">Free</option>
+            <option value="1:1">1:1</option>
+            <option value="2:3">2:3</option>
+            <option value="3:2">3:2</option>
+            <option value="3:4">3:4</option>
+            <option value="4:3">4:3</option>
+            <option value="9:16">9:16</option>
+            <option value="16:9">16:9</option>
+          </select>
         </div>
       </div>
     </div>

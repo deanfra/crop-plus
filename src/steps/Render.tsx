@@ -12,7 +12,7 @@ export const Render: React.FC = observer(() => {
   const [outputUrl, setOutputUrl] = useState<string>();
   const [logVisible, setLogVisible] = useState(false);
 
-  const { ffmpeg, video } = mainStore;
+  const { ffmpeg, video, hasAudio } = mainStore;
 
   if (!ffmpeg.loaded) {
     return (
@@ -76,15 +76,27 @@ export const Render: React.FC = observer(() => {
     }
 
     if (time) {
-      let start = 0;
-      if (time[0] > 0) {
-        start = time[0];
-        args.push('-ss', `${start}`);
-      }
+      // Example concat [
+      //   '-ss','10','-to','11','-i','input',
+      //   '-ss','14','-to','15','-i','input',
+      //   '-filter_complex',
+      //   '[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1',
+      // ]
 
-      if (time[1] < video.duration) {
-        args.push('-t', `${time[1] - start}`);
-      }
+      const ssArgs = time.flatMap(t => [
+        '-ss',
+        String(t[0]),
+        '-to',
+        String(t[1]),
+        '-i',
+        'input',
+      ]);
+      args.push(...ssArgs);
+      args.push('-filter_complex');
+      const filterComplexArgs = `concat=n=${time.length}:v=1${
+        hasAudio ? ':a=1' : ''
+      }`;
+      args.push(filterComplexArgs);
     }
 
     args.push('-c:v', 'libx264');
@@ -93,8 +105,9 @@ export const Render: React.FC = observer(() => {
     if (mute) {
       args.push('-an');
     } else {
-      args.push('-c:a', 'copy');
+      // args.push('-c:a', 'copy');
     }
+    console.log('ffmpeg.exec crop...', args);
 
     const newFile = await ffmpeg.exec(mainStore.file!, args);
     setOutputUrl(URL.createObjectURL(newFile));

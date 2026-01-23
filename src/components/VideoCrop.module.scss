@@ -13,6 +13,7 @@ $handle-offset: -$handle-width - $box-width;
 .crop {
   position: relative;
   font-size: 0;
+  margin-top: 2rem;
 
   .box {
     border: $box-width solid white;
@@ -22,7 +23,7 @@ $handle-offset: -$handle-width - $box-width;
 
     .dimensions {
       position: absolute;
-      top: -2rem;
+      bottom: -2rem;
       right: 0;
       z-index: 9999;
       color: white;
@@ -99,5 +100,6 @@ $handle-offset: -$handle-width - $box-width;
 }
 
 .options {
+  bottom: -2rem;
   margin-bottom: 0.25rem;
 }

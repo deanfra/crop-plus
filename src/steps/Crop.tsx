@@ -8,12 +8,14 @@ import {
   BsSymmetryHorizontal,
   BsVolumeUp,
   BsArrowCounterclockwise,
+  BsPlusSquareDotted,
 } from 'react-icons/bs';
 
 import styles from './Crop.module.scss';
 import { mainStore } from '../stores/main';
 import { VideoCrop } from '../components/VideoCrop';
 import { VideoTrim } from '../components/VideoTrim';
+import { Time } from '../types';
 
 export const Crop: React.FC = observer(() => {
   const video = mainStore.video;
@@ -31,6 +33,7 @@ export const Crop: React.FC = observer(() => {
         <div>
           <button
             title={mainStore.transform.mute ? 'Unmute' : 'Mute'}
+            disabled={!mainStore.hasAudio}
             onClick={() => {
               runInAction(() => {
                 const mute = !mainStore.transform.mute;
@@ -42,7 +45,11 @@ export const Crop: React.FC = observer(() => {
               });
             }}
           >
-            {mainStore.transform.mute ? <BsVolumeMute /> : <BsVolumeUp />}
+            {mainStore.transform.mute || !mainStore.hasAudio ? (
+              <BsVolumeMute />
+            ) : (
+              <BsVolumeUp />
+            )}
           </button>
           <button
             title="Flip horizontally"
@@ -88,6 +95,22 @@ export const Crop: React.FC = observer(() => {
           >
             <BsSymmetryHorizontal />
           </button>
+          <button
+            title="Add segment"
+            onClick={() => {
+              runInAction(() => {
+                const { time } = mainStore.transform;
+                mainStore.transform = {
+                  ...mainStore.transform,
+                  time: time?.length
+                    ? fillFirstGap(time, video.duration)
+                    : ([[0, video.duration]] as Time[]),
+                };
+              });
+            }}
+          >
+            <BsPlusSquareDotted />
+          </button>
         </div>
         <div>
           <button
@@ -112,7 +135,7 @@ export const Crop: React.FC = observer(() => {
         </div>
       </div>
       <VideoTrim
-        time={mainStore.transform.time}
+        trimTime={mainStore.transform.time}
         video={video}
         onChange={time => {
           runInAction(() => {
@@ -138,3 +161,40 @@ export const Crop: React.FC = observer(() => {
     </div>
   );
 });
+
+function fillFirstGap(intervals: Time[], max: number): Time[] {
+  if (intervals.length === 0) {
+    return [[0, max]];
+  }
+
+  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
+  const result: Time[] = [];
+
+  // Gap from 0 to first interval
+  const [firstStart] = sorted[0];
+  if (firstStart > 0) {
+    return [[0, firstStart], ...sorted];
+  }
+
+  // Gaps between intervals
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const [start, end] = sorted[i];
+    const [nextStart] = sorted[i + 1];
+
+    result.push([start, end]);
+
+    if (end < nextStart) {
+      result.push([end, nextStart]);
+      return result.concat(sorted.slice(i + 1));
+    }
+  }
+
+  // Gap from last interval to max
+  const last = sorted[sorted.length - 1];
+  if (last[1] < max) {
+    return [...sorted, [last[1], max]];
+  }
+
+  // No gaps
+  return sorted;
+}
