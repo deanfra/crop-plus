@@ -16,6 +16,7 @@ import { mainStore } from '../stores/main';
 import { VideoCrop } from '../components/VideoCrop';
 import { VideoTrim } from '../components/VideoTrim';
 import { Time } from '../types';
+import clsx from 'clsx';
 
 export const Crop: React.FC = observer(() => {
   const video = mainStore.video;
@@ -53,6 +54,7 @@ export const Crop: React.FC = observer(() => {
           </button>
           <button
             title="Flip horizontally"
+            className={mainStore.transform.flipH ? 'active' : ''}
             onClick={() => {
               runInAction(() => {
                 const { flipH, area } = mainStore.transform;
@@ -75,6 +77,7 @@ export const Crop: React.FC = observer(() => {
           </button>
           <button
             title="Flip vertically"
+            className={mainStore.transform.flipV ? 'active' : ''}
             onClick={() => {
               runInAction(() => {
                 const { flipV, area } = mainStore.transform;

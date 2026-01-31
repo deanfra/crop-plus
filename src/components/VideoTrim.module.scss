@@ -24,13 +24,14 @@
   }
 
   .deleteSegmentButton {
-    border-radius: 0px 0px 5px 0px;
+    border-radius: 0px 5px 5px 0px;
     margin-left: 0.9rem;
   }
 
   .splitButton {
-    border-radius: 0px 0px 0px 5px;
-    margin-left: -0.9rem;
+    border-radius: 5px 0px 0px 5px;
+    margin-left: -0.8rem;
+    border-right: 1px solid #000;
   }
 
   .range {
@@ -42,6 +43,11 @@
     background: var(--color-range-bg);
     cursor: move;
     touch-action: manipulation;
+  }
+
+  .rangeTools {
+    position: absolute;
+    top: 0.3em;
   }
 
   .current,

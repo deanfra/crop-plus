@@ -91,10 +91,12 @@ export const VideoTrim: React.FC<VideoTrimProps> = ({
         case 'move':
           {
             relativeX = clamp(
-              (deltaX / rect.width) * video.duration,
+              deltaX / 10,
+              // (deltaX / rect.width) * video.duration,
               -1 * state.time![0],
               video.duration - state.time![1],
             );
+
             newTime[cur][0] = state.time![0] + relativeX;
             newTime[cur][1] = state.time![1] + relativeX;
 
@@ -212,59 +214,70 @@ export const VideoTrim: React.FC<VideoTrimProps> = ({
         >
           {/* Segments */}
           {trimTime.map((segmentTime, index) => (
-            <div
-              className={styles.range}
-              key={`segment-${index}`}
-              style={{
-                left: `${vidPercent(video, segmentTime[0])}%`,
-                right: `${100 - vidPercent(video, segmentTime[1])}%`,
-              }}
-              {...dragProps({
-                id: index,
-                direction: 'move',
-                time: segmentTime,
-                paused: video.paused,
-              })}
-            >
-              <button
-                className={styles.splitButton}
-                onClick={() => handleSplitSegment(index)}
-                title="Split segment in half"
-              >
-                <BsVr />
-              </button>
-              <button
-                className={styles.deleteSegmentButton}
-                onClick={() => handleDeleteSegment(index)}
-                title="Delete segment"
-              >
-                <BsFileX />
-              </button>
+            <>
               <div
-                className={clsx(styles.handleLeft, {
-                  [styles.active]: dragState?.direction,
-                })}
-                data-time={humanTime(segmentTime[0])}
+                className={styles.range}
+                key={`segment-${index}`}
+                style={{
+                  left: `${vidPercent(video, segmentTime[0])}%`,
+                  right: `${100 - vidPercent(video, segmentTime[1])}%`,
+                }}
                 {...dragProps({
                   id: index,
-                  direction: 'left',
-                  currentTime,
+                  direction: 'move',
+                  time: segmentTime,
                   paused: video.paused,
                 })}
-              />
+              >
+                <div
+                  className={clsx(styles.handleLeft, {
+                    [styles.active]: dragState?.direction,
+                  })}
+                  data-time={humanTime(segmentTime[0])}
+                  {...dragProps({
+                    id: index,
+                    direction: 'left',
+                    currentTime,
+                    paused: video.paused,
+                  })}
+                />
+                <div
+                  className={clsx(styles.handleRight, {
+                    [styles.active]: dragState?.direction,
+                  })}
+                  data-time={humanTime(segmentTime[1])}
+                  {...dragProps({
+                    id: index,
+                    direction: 'right',
+                    currentTime,
+                    paused: video.paused,
+                  })}
+                />
+              </div>
               <div
-                className={clsx(styles.handleRight, {
-                  [styles.active]: dragState?.direction,
-                })}
-                data-time={humanTime(segmentTime[1])}
-                {...dragProps({
-                  id: index,
-                  direction: 'right',
-                  currentTime,
-                  paused: video.paused,
-                })}
-              />
-            </div>
+                className={styles.rangeTools}
+                key={`segment-tools-${index}`}
+                style={{
+                  left: `${vidPercent(video, segmentTime[0])}%`,
+                  right: `${100 - vidPercent(video, segmentTime[1])}%`,
+                }}
+              >
+                <button
+                  className={styles.splitButton}
+                  onClick={() => handleSplitSegment(index)}
+                  title="Split segment in half"
+                >
+                  <BsVr />
+                </button>
+                <button
+                  className={styles.deleteSegmentButton}
+                  onClick={() => handleDeleteSegment(index)}
+                  title="Delete segment"
+                >
+                  <BsFileX />
+                </button>
+              </div>
+            </>
           ))}
 
           {/* Current Time */}

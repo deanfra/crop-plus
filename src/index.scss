@@ -110,6 +110,7 @@ button,
     margin-right: 0.25rem;
   }
 
+  &.active,
   &:hover {
     background: #444444;
   }
