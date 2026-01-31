@@ -16,7 +16,6 @@ import { mainStore } from '../stores/main';
 import { VideoCrop } from '../components/VideoCrop';
 import { VideoTrim } from '../components/VideoTrim';
 import { Time } from '../types';
-import clsx from 'clsx';
 
 export const Crop: React.FC = observer(() => {
   const video = mainStore.video;
