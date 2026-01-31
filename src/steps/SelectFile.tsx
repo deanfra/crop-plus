@@ -47,7 +47,7 @@ export const SelectFile: React.FC = observer(() => {
         </div>
         <div>
           <a
-            href="https://github.com/mat-sz/crop"
+            href="https://github.com/deanfra/crop-plus"
             rel="noopener noreferrer"
             target="_blank"
           >
